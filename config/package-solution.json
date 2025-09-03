@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "candidates-client-side-solution",
+    "id": "59ec4252-bfc2-4eea-8426-bcf8ede1d234",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.20.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "candidates description"
+      },
+      "longDescription": {
+        "default": "candidates description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "candidates Feature",
+        "description": "The feature that activates elements of the candidates solution.",
+        "id": "3713a46c-3e52-4597-b5f9-37a1ac429380",
+        "version": "1.0.0.0"
+      }
+    ],
+    "webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Files.Read"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/candidates.sppkg"
+  }
+}
