@@ -14,9 +14,16 @@ export interface ICsvSearchFormProps {
   context: WebPartContext;
 }
 
-// Normalize headers (replace spaces, (), - with _)
+
 const normalizeKey = (key: string): string =>
-  key ? key.toString().replace(/\s+|\(|\)|\-+/g, "_") : key;
+  key
+    ? key
+        .toString()
+        .trim()
+        .replace(/\s+|\(|\)|-+/g, "_")   // replace spaces, (), -
+        .replace(/^_+|_+$/g, "")         // remove leading/trailing underscores
+    : key;
+
 
 const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [data, setData] = React.useState<any[]>([]);
@@ -89,15 +96,16 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
     setLoading(true);
     setTimeout(() => {
       const filtered = data.filter((row) =>
-        Object.keys(query).every((key) =>
-          !query[key]
-            ? true
-            : row[normalizeKey(key)]
-                ?.toString()
-                .toLowerCase()
-                .includes(query[key].toLowerCase())
-        )
-      );
+  Object.keys(query).every((key) =>
+    !query[key]
+      ? true
+      : row[normalizeKey(key)]
+          ?.toString()
+          .toLowerCase()
+          .includes(query[key].toLowerCase())
+  )
+);
+
       setResults(filtered);
       setCurrentPage(1);
       setLoading(false);
@@ -176,25 +184,27 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
         <div className={styles.card}>
           <h2 className={styles.cardTitle}>🔎 Search Candidates</h2>
           <div className={styles.form}>
-            {[
-              "City",
-              "Functional_Area",
-              "Industry",
-              "Key_Skills",
-              "Salary",
-              "Work_Experience",
-              "Preferred_Location",
-              "Course_2nd_Highest_Education",
-            ].map((field) => (
-              <input
-                key={field}
-                name={field}
-                placeholder={field.replace(/_/g, " ")}
-                className={styles.input}
-                value={query[field] || ""}
-                onChange={handleChange}
-              />
-            ))}
+            {["City",
+ "Functional_Area",
+ "Industry",
+ "Key_Skills",
+ "Salary",
+ "Work_Experience",
+ "Preferred_Location",
+normalizeKey("Course(2nd_Highest_Education)") 
+// returns "Course_2nd_Highest_Education"
+
+].map((field) => (
+  <input
+    key={field}
+    name={field} // must match normalized header
+    placeholder={field.replace(/_/g, " ")}
+    className={styles.input}
+    value={query[field] || ""}
+    onChange={handleChange}
+  />
+))
+}
 
             <button
               className={styles.searchBtn}
