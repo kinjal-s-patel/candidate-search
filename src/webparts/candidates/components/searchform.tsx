@@ -2,8 +2,7 @@ import * as React from "react";
 import * as XLSX from "xlsx";
 import styles from "./searchform.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
-import logo from '../assets/LOGO.png';
-
+import logo from "../assets/LOGO.png";
 
 // PnP SP
 import { spfi } from "@pnp/sp";
@@ -24,14 +23,15 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [results, setResults] = React.useState<any[]>([]);
   const [query, setQuery] = React.useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = React.useState(1);
-const rowsPerPage = 20;
+  const [loading, setLoading] = React.useState(false); // ✅ Loader state
 
-const indexOfLastRow = currentPage * rowsPerPage;
-const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-const currentRows = results.slice(indexOfFirstRow, indexOfLastRow);
+  const rowsPerPage = 20;
 
-const totalPages = Math.ceil(results.length / rowsPerPage);
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = results.slice(indexOfFirstRow, indexOfLastRow);
 
+  const totalPages = Math.ceil(results.length / rowsPerPage);
 
   // ✅ Initialize SP
   const sp = React.useMemo(() => spfi().using(SPFx(context)), [context]);
@@ -42,6 +42,7 @@ const totalPages = Math.ceil(results.length / rowsPerPage);
       try {
         const filePath =
           "/sites/Candidates/Shared Documents/All India Salaried Database/1.xlsx";
+           "/sites/Candidates/Shared Documents/candidate data/113.xlsx";
 
         const blob = await sp.web
           .getFileByServerRelativePath(filePath)
@@ -51,7 +52,10 @@ const totalPages = Math.ceil(results.length / rowsPerPage);
         const workbook = XLSX.read(buffer, { type: "array" });
 
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: "" });
+        const rows = XLSX.utils.sheet_to_json<any[]>(sheet, {
+          header: 1,
+          defval: "",
+        });
 
         if (!rows || rows.length < 2) return;
 
@@ -80,20 +84,26 @@ const totalPages = Math.ceil(results.length / rowsPerPage);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setQuery({ ...query, [e.target.name]: e.target.value });
 
-  // 🔍 Search
+  // 🔍 Search with loader
   const handleSearch = () => {
-    const filtered = data.filter((row) =>
-      Object.keys(query).every((key) =>
-        !query[key]
-          ? true
-          : row[normalizeKey(key)]
-              ?.toString()
-              .toLowerCase()
-              .includes(query[key].toLowerCase())
-      )
-    );
-    setResults(filtered);
+    setLoading(true);
+    setTimeout(() => {
+      const filtered = data.filter((row) =>
+        Object.keys(query).every((key) =>
+          !query[key]
+            ? true
+            : row[normalizeKey(key)]
+                ?.toString()
+                .toLowerCase()
+                .includes(query[key].toLowerCase())
+        )
+      );
+      setResults(filtered);
+      setCurrentPage(1);
+      setLoading(false);
+    }, 500); // small delay so spinner is visible
   };
+
   // Hide SharePoint chrome
   React.useEffect(() => {
     const style = document.createElement("style");
@@ -134,120 +144,126 @@ const totalPages = Math.ceil(results.length / rowsPerPage);
     document.head.appendChild(style);
   }, []);
 
-
   return (
-        <div
+    <div
       style={{
-        width: '100vw',
-        height: '100vh',
+        width: "100vw",
+        height: "100vh",
         margin: 0,
         padding: 0,
-        overflow: 'auto',
-        backgroundColor: '#fff',
-        position: 'fixed',
+        overflow: "auto",
+        backgroundColor: "#fff",
+        position: "fixed",
         top: 0,
         left: 0,
-        zIndex: 9999
+        zIndex: 9999,
       }}
     >
-    <div className={styles.pageWrapper}>
-      {/* 🔹 Header */}
-      <header className={styles.header}>
-        <div className={styles.logo}>
-  <img src={logo} alt="Logo" style={{ width: '120px', height: 'auto' }} />
-</div>
-
-        <div className={styles.titleBlock}>
-          <h1>Candidate Search</h1>
-          <p>Search Candidates Easily</p>
-        </div>  
-      </header>
-
-      {/* 🔹 Search Form Card */}
-      <div className={styles.card}>
-        <h2 className={styles.cardTitle}>🔎 Search Candidates</h2>
-        <div className={styles.form}>
-          {[
-            "City",
-            "Functional_Area",
-            "Industry",
-            "Key_Skills",
-            "Salary",
-            "Work_Experience",
-            "Preferred_Location",
-            "Course_2nd_Highest_Education",       
-          ].map((field) => (
-            <input
-              key={field}
-              name={field}
-              placeholder={field.replace(/_/g, " ")}
-              className={styles.input}
-              value={query[field] || ""}
-              onChange={handleChange}
-            />
-          ))}
-          <button className={styles.searchBtn} onClick={handleSearch}>
-            Search
-          </button>
-        </div>
-      </div>
-
-      {/* 🔹 Results */}
-      <div className={styles.card}>
-        <h3 className={styles.cardTitle}>📊 Results</h3>
-        {results.length === 0 ? (
-          <p className={styles.noResults}>No records found.</p>
-        ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.resultsTable}>
-              <thead>
-                <tr>
-                  {Object.keys(results[0]).map((col) => (
-                    <th key={col}>{col.replace(/_/g, " ")}</th>
-                  ))}
-                </tr>
-              </thead>
-          <tbody>
-  {currentRows.map((row, idx) => (
-    <tr key={idx}>
-      {Object.keys(row).map((col) => (
-        <td key={col}>{row[col]}</td>
-      ))}
-    </tr>
-  ))}
-</tbody>
-
-            </table>
-
-            <div className={styles.pagination}>
-  <button 
-    disabled={currentPage === 1} 
-    onClick={() => setCurrentPage((prev) => prev - 1)}
-  >
-    ◀ Prev
-  </button>
-
-  <span>
-    Page {currentPage} of {totalPages}
-  </span>
-
-  <button 
-    disabled={currentPage === totalPages} 
-    onClick={() => setCurrentPage((prev) => prev + 1)}
-  >
-    Next ▶
-  </button>
-</div>
-
+      <div className={styles.pageWrapper}>
+        {/* 🔹 Header */}
+        <header className={styles.header}>
+          <div className={styles.logo}>
+            <img src={logo} alt="Logo" style={{ width: "120px", height: "auto" }} />
           </div>
-        )}
-      </div>
 
-      {/* 🔹 Footer */}
-      <footer className={styles.footer}>
-        © 2025 Candidate Search. All rights reserved.
-      </footer>
-    </div>
+          <div className={styles.titleBlock}>
+            <h1>Candidate Search</h1>
+            <p>Search Candidates Easily</p>
+          </div>
+        </header>
+
+        {/* 🔹 Search Form Card */}
+        <div className={styles.card}>
+          <h2 className={styles.cardTitle}>🔎 Search Candidates</h2>
+          <div className={styles.form}>
+            {[
+              "City",
+              "Functional_Area",
+              "Industry",
+              "Key_Skills",
+              "Salary",
+              "Work_Experience",
+              "Preferred_Location",
+              "Course_2nd_Highest_Education",
+            ].map((field) => (
+              <input
+                key={field}
+                name={field}
+                placeholder={field.replace(/_/g, " ")}
+                className={styles.input}
+                value={query[field] || ""}
+                onChange={handleChange}
+              />
+            ))}
+
+            <button
+              className={styles.searchBtn}
+              onClick={handleSearch}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className={styles.loading}></span>
+              ) : (
+                "Search"
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* 🔹 Results */}
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>📊 Results</h3>
+          {results.length === 0 ? (
+            <p className={styles.noResults}>No records found.</p>
+          ) : (
+            <div className={styles.tableWrapper}>
+              <table className={styles.resultsTable}>
+                <thead>
+                  <tr>
+                    {Object.keys(results[0]).map((col) => (
+                      <th key={col}>{col.replace(/_/g, " ")}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRows.map((row, idx) => (
+                    <tr key={idx}>
+                      {Object.keys(row).map((col) => (
+                        <td key={col}>{row[col]}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className={styles.pagination}>
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  ◀ Prev
+                </button>
+
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next ▶
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 🔹 Footer */}
+        <footer className={styles.footer}>
+          © 2025 Candidate Search. All rights reserved.
+        </footer>
+      </div>
     </div>
   );
 };
