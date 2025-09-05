@@ -15,18 +15,16 @@
 .header {
   background: linear-gradient(to right, #0e5a69, #1E93AB); /* ✅ Teal gradient */
   color: white;
-  display: flex; 
+  display: flex;
   align-items: center;
   padding: 1rem 2rem;
   gap: 1rem;
 }
 
-/* Logo */
 .logo img {
-  width: 45px;   /* reduce from 80px → 45px */
+  width: 45px;
   height: auto;
 }
-
 
 .titleBlock {
   display: flex;
@@ -71,41 +69,78 @@
    ===================== */
 .form {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* evenly spaced */
+  gap: 0.5rem 2rem;
+  align-items: center;
 }
 
 .input {
-  padding: 0.6rem;
+  width: 100%;
+  padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
+  line-height: 1.4;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #0078d4;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+  }
+
+  /* Remove inputGroup — not needed unless you add labels */
+.inputGroup {
+  margin: 0; /* reset */
+  padding: 0;
+}
+
+}
+
+/* Button Group */
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end; /* ✅ Aligns buttons to the right */
+  grid-column: 1 / -1; /* ✅ span full row */
 }
 
 .searchBtn {
-  grid-column: span 2;
-  background: #1E93AB; /* ✅ primary */
+  background: #1E93AB;
   color: white;
   font-weight: bold;
   border: none;
-  padding: 0.8rem;
+  padding: 0.8rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .searchBtn:hover {
-  background: #167d91; /* ✅ darker teal */
+  background: #167d91;
+}
+
+.clearBtn {
+  background: #ccc;
+  color: #000;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.clearBtn:hover {
+  background: #aaa;
 }
 
 .loading {
   text-align: center;
   padding: 1rem;
   font-size: 1.1rem;
-  color: #1e93ab; /* your theme color */
+  color: #1e93ab;
   font-weight: 500;
 }
-
 
 /* =====================
    Results Table
@@ -135,7 +170,7 @@
 }
 
 .resultsTable thead {
-  background: #0e5a69; /* ✅ header color */
+  background: #0e5a69;
   color: #fff;
 }
 
@@ -156,11 +191,11 @@
 }
 
 .resultsTable tbody tr:nth-child(even) {
-  background: #f0f9fb; /* ✅ light teal zebra */
+  background: #f0f9fb;
 }
 
 .resultsTable tbody tr:hover {
-  background: #d9f1f5; /* ✅ hover highlight */
+  background: #d9f1f5;
   transition: background 0.2s ease-in-out;
 }
 
@@ -178,25 +213,25 @@
   align-items: center;
   margin-top: 1rem;
   gap: 1rem;
+}
 
-  button {
-    background: #1E93AB; /* ✅ teal */
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
+.pagination button {
+  background: #1E93AB;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-  button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-  }
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 
-  button:hover:not(:disabled) {
-    background: #167d91; /* ✅ darker teal */
-  }
+.pagination button:hover:not(:disabled) {
+  background: #167d91;
 }
 
 /* =====================
@@ -205,7 +240,7 @@
 .footer {
   text-align: center;
   padding: 1rem;
-  background: #0e5a69; /* ✅ footer */
+  background: #0e5a69;
   color: white;
   margin-top: auto;
 }
