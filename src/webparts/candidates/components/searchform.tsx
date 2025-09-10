@@ -1,14 +1,7 @@
 import * as React from "react";
-
 import styles from "./searchform.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import logo from "../assets/LOGO.png";
-
-// PnP SP
-// import { spfi } from "@pnp/sp";
-// import { SPFx } from "@pnp/sp/presets/all";
-import "@pnp/sp/webs";
-import "@pnp/sp/files";
 
 export interface ICsvSearchFormProps {
   context: WebPartContext;
@@ -25,58 +18,42 @@ const normalizeKey = (key: string): string =>
     : key;
 
 const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
-  const [data, setData] = React.useState<any[]>([]);
-  const [] = React.useState<string[]>([]);
   const [results, setResults] = React.useState<any[]>([]);
   const [query, setQuery] = React.useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [totalRows, setTotalRows] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
 
   const rowsPerPage = 20;
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = results.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.max(1, Math.ceil(results.length / rowsPerPage));
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
-  // SP init
-  // const sp = React.useMemo(() => spfi().using(SPFx(context)), [context]);
-
-  // Load Excel and normalize headers once
-  React.useEffect(() => {
-  const loadData = async () => {
+  // --- ✅ Fetch from API with pagination + filters
+  const fetchPage = async (page: number, filters: Record<string, string> = {}) => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: rowsPerPage.toString(),
+        ...filters,
+      });
+      const res = await fetch(`http://localhost:3000/api/users?${params.toString()}`);
+      if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
 
-     const res = await fetch("http://localhost:3000/api/users?page=1&pageSize=100000");
-
-if (!res.ok) {
-  throw new Error(`API error ${res.status}: ${res.statusText}`);
-}
-
-const rows = await res.json();
-console.log("✅ API response received:", rows);
-if (Array.isArray(rows)) {
-  console.log(`✅ Received ${rows.length} rows from database`);
-} else {
-  console.warn("⚠️ API did not return an array:", rows);
-}
-
-      setData(rows);
-      setResults(rows); // initialize results with all rows
-      console.log(`Fetched ${rows.length} rows from API`);
+      const result = await res.json();
+      setResults(result.data || []);
+      setTotalRows(result.total || 0);
+      setCurrentPage(result.page || page);
     } catch (err) {
       console.error("Error fetching API data:", err);
-      setData([]);
       setResults([]);
+      setTotalRows(0);
     } finally {
       setLoading(false);
     }
   };
 
-  loadData();
-}, []);
 
-  // fields to render (use human-friendly labels but compute normalized keys)
+  // form fields
   const rawFormFields = [
     "City",
     "Functional_Area",
@@ -100,91 +77,34 @@ if (Array.isArray(rows)) {
     []
   );
 
-  // safe helper to extract unique values for a given normalized key
-  const getUniqueValues = React.useCallback(
-    (key: string) => {
-      try {
-        if (!Array.isArray(data) || data.length === 0) return [];
-        const vals: string[] = [];
-        for (const row of data) {
-          try {
-            const rawVal = row?.[key];
-            if (rawVal === null || rawVal === undefined) continue;
-
-            if (typeof rawVal === "string" || typeof rawVal === "number" || typeof rawVal === "boolean") {
-              const s = String(rawVal).trim();
-              if (s) vals.push(s);
-              continue;
-            }
-
-            // if it's an array (e.g. skills stored as array)
-            if (Array.isArray(rawVal)) {
-              const joined = rawVal.map((v) => String(v).trim()).filter(Boolean).join(", ");
-              if (joined) vals.push(joined);
-              continue;
-            }
-
-            // if it's an object, try common properties or stringify
-            if (typeof rawVal === "object") {
-              const candidate = String(rawVal?.Title ?? rawVal?.Name ?? rawVal?.name ?? rawVal?.label ?? JSON.stringify(rawVal)).trim();
-              if (candidate) vals.push(candidate);
-              continue;
-            }
-          } catch (inner) {
-            // ignore badly shaped row cell
-            continue;
-          }
-        }
-
-        // unique & preserve insertion order
-        return Array.from(new Set(vals));
-      } catch (e) {
-        console.error("getUniqueValues error for key", key, e);
-        return [];
-      }
-    },
-    [data]
-  );
-
-  const cityKey = normalizeKey("City");
-  const cityOptions = React.useMemo(() => getUniqueValues(cityKey), [getUniqueValues, cityKey]);
-
-  // handle change (inputs use normalized `name`)
+  // handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setQuery((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // Search using normalized keys that are stored in query
-  const handleSearch = () => {
-    setLoading(true);
-    setTimeout(() => {
-      try {
-        const filtered = data.filter((row) =>
-          Object.entries(query).every(([k, v]) => {
-            if (!v || v.toString().trim() === "") return true;
-            const cell = row?.[k];
-            const text = cell === null || cell === undefined ? "" : typeof cell === "object" ? JSON.stringify(cell) : String(cell);
-            return text.toLowerCase().includes(v.toLowerCase());
-          })
-        );
-        setResults(filtered);
-        setCurrentPage(1);
-      } catch (e) {
-        console.error("Search error:", e);
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 300);
-  };
+// --- Remove this useEffect
+// React.useEffect(() => {
+//   fetchPage(1);
+// }, []);
 
-  // Clear filters
-  const handleClear = () => {
-    setQuery({});
-    setResults([]);
-    setCurrentPage(1);
-  };
+// ✅ handleSearch will fetch results
+const handleSearch = () => {
+  if (Object.keys(query).length === 0) {
+    alert("Please enter at least one search filter");
+    return;
+  }
+  fetchPage(1, query);
+};
 
-  // Hide SharePoint chrome (kept as you had it)
+// ✅ clear filters (no auto-fetch)
+const handleClear = () => {
+  setQuery({});
+  setResults([]); // clear results
+  setTotalRows(0);
+  setCurrentPage(1);
+};
+
+
+  // hide SharePoint chrome
   React.useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -233,38 +153,20 @@ if (Array.isArray(rows)) {
           <h2 className={styles.cardTitle}>🔎 Search Candidates</h2>
 
           <div className={styles.form}>
-            {formFields.map(({ key, label }) =>
-              key === cityKey ? (
-                <div key={key} className={styles.inputGroup}>
-                  <input
-                    list="city-options"
-                    name={key}
-                    placeholder={label}
-                    className={styles.input}
-                    value={query[key] || ""}
-                    onChange={handleChange}
-                  />
-                  <datalist id="city-options">
-                    {cityOptions.map((city, i) => (
-                      <option key={i} value={city} />
-                    ))}
-                  </datalist>
-                </div>
-              ) : (
-                <input
-                  key={key}
-                  name={key}
-                  placeholder={label}
-                  className={styles.input}
-                  value={query[key] || ""}
-                  onChange={handleChange}
-                />
-              )
-            )}
+            {formFields.map(({ key, label }) => (
+              <input
+                key={key}
+                name={key}
+                placeholder={label}
+                className={styles.input}
+                value={query[key] || ""}
+                onChange={handleChange}
+              />
+            ))}
 
             <div className={styles.buttonGroup}>
               <button className={styles.searchBtn} onClick={handleSearch} disabled={loading}>
-                {loading ? <span className={styles.loading}></span> : "Search"}
+                {loading ? "Loading..." : "Search"}
               </button>
               <button className={styles.clearBtn} onClick={handleClear} disabled={loading}>
                 Clear Filters
@@ -277,8 +179,13 @@ if (Array.isArray(rows)) {
         <div className={styles.card}>
           <h3 className={styles.cardTitle}>📊 Results</h3>
           {results.length === 0 ? (
-            <p className={styles.noResults}>No records found.</p>
-          ) : (
+  <p className={styles.noResults}>
+    {Object.keys(query).length === 0
+      ? "Please enter a search filter and click Search."
+      : "No records found."}
+  </p>
+) : (
+
             <div className={styles.tableWrapper}>
               <table className={styles.resultsTable}>
                 <thead>
@@ -289,7 +196,7 @@ if (Array.isArray(rows)) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentRows.map((row, idx) => (
+                  {results.map((row, idx) => (
                     <tr key={idx}>
                       {Object.keys(row).map((col) => (
                         <td key={col}>{Array.isArray(row[col]) ? row[col].join(", ") : String(row[col] ?? "")}</td>
@@ -300,7 +207,7 @@ if (Array.isArray(rows)) {
               </table>
 
               <div className={styles.pagination}>
-                <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}>
+                <button disabled={currentPage === 1} onClick={() => fetchPage(currentPage - 1, query)}>
                   ◀ Prev
                 </button>
 
@@ -308,7 +215,7 @@ if (Array.isArray(rows)) {
                   Page {currentPage} of {totalPages}
                 </span>
 
-                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}>
+                <button disabled={currentPage === totalPages} onClick={() => fetchPage(currentPage + 1, query)}>
                   Next ▶
                 </button>
               </div>
