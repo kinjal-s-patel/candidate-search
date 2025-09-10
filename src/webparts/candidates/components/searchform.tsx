@@ -1,12 +1,12 @@
 import * as React from "react";
-import * as XLSX from "xlsx";
+
 import styles from "./searchform.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import logo from "../assets/LOGO.png";
 
 // PnP SP
-import { spfi } from "@pnp/sp";
-import { SPFx } from "@pnp/sp/presets/all";
+// import { spfi } from "@pnp/sp";
+// import { SPFx } from "@pnp/sp/presets/all";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
 
@@ -26,7 +26,7 @@ const normalizeKey = (key: string): string =>
 
 const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [data, setData] = React.useState<any[]>([]);
-  const [, setHeaders] = React.useState<string[]>([]);
+  const [] = React.useState<string[]>([]);
   const [results, setResults] = React.useState<any[]>([]);
   const [query, setQuery] = React.useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -39,57 +39,42 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const totalPages = Math.max(1, Math.ceil(results.length / rowsPerPage));
 
   // SP init
-  const sp = React.useMemo(() => spfi().using(SPFx(context)), [context]);
+  // const sp = React.useMemo(() => spfi().using(SPFx(context)), [context]);
 
   // Load Excel and normalize headers once
   React.useEffect(() => {
-    const loadFile = async () => {
-      try {
-        const filePath =
-          "/sites/Candidates/Shared Documents/All India Salaried Database/1.xlsx";
-           "/sites/Candidates/Shared Documents/All India Salaried Database/113.xlsx";
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-        const blob = await sp.web
-          .getFileByServerRelativePath(filePath)
-          .getBlob();
+     const res = await fetch("http://localhost:3000/api/users?page=1&pageSize=100000");
 
-        const buffer = await blob.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json<any[]>(sheet, {
-          header: 1,
-          defval: "",
-        });
+if (!res.ok) {
+  throw new Error(`API error ${res.status}: ${res.statusText}`);
+}
 
-        if (!rows || rows.length < 2) {
-          setData([]);
-          setHeaders([]);
-          return;
-        }
+const rows = await res.json();
+console.log("✅ API response received:", rows);
+if (Array.isArray(rows)) {
+  console.log(`✅ Received ${rows.length} rows from database`);
+} else {
+  console.warn("⚠️ API did not return an array:", rows);
+}
 
-        const rawHeaders = rows[0] as string[];
-        const normalizedHeaders = rawHeaders.map((h) => normalizeKey(String(h || "")));
-        setHeaders(normalizedHeaders);
+      setData(rows);
+      setResults(rows); // initialize results with all rows
+      console.log(`Fetched ${rows.length} rows from API`);
+    } catch (err) {
+      console.error("Error fetching API data:", err);
+      setData([]);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const dataRows = rows.slice(1);
-        const formatted = dataRows.map((r) =>
-          normalizedHeaders.reduce((acc, h, i) => {
-            acc[h] = r[i] ?? "";
-            return acc;
-          }, {} as Record<string, any>)
-        );
-
-        setData(formatted);
-        console.log(`Parsed ${formatted.length} rows with ${normalizedHeaders.length} headers`);
-      } catch (err) {
-        console.error("Error fetching Excel file:", err);
-        setData([]);
-        setHeaders([]);
-      }
-    };
-
-    loadFile();
-  }, [sp]);
+  loadData();
+}, []);
 
   // fields to render (use human-friendly labels but compute normalized keys)
   const rawFormFields = [
