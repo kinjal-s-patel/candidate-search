@@ -23,6 +23,7 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalRows, setTotalRows] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+// const [cities] = React.useState<string[]>([]);
 
   const rowsPerPage = 20;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
@@ -53,9 +54,9 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   };
 
 
+
   // form fields
   const rawFormFields = [
-    "City",
     "Functional_Area",
     "Industry",
     "Key_Skills",
@@ -66,6 +67,8 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
     "Specialization(Highest_Education)",
     "Course(2nd_Highest_Education)",
   ];
+
+  
 
   const formFields = React.useMemo(
     () =>
@@ -102,6 +105,58 @@ const handleClear = () => {
   setTotalRows(0);
   setCurrentPage(1);
 };
+const visibleColumnsMap: Record<string, string> = {
+  "Name": "Name",
+  "Mobile": "Mobile",
+  "Email": "Email",
+  "Address": "Address",
+  "City": "City",
+  "DOB": "DOB",
+  "Functional Area": "Functional_Area",
+  "Area of Specialization": "Area_of_Specialization",
+  "Industry": "Industry",
+  "Resume Title": "Resume_Title",
+  "Key Skills": "Key_Skills",
+  "Company": "Company",
+  "Salary": "Salary",
+  "Work Experience": "Work_Experience",
+  "Level": "Level",
+  "Preferred Location": "Preferred_Location",
+     "CourseHighest Education": "CourseHighest_Education",
+  "SpecializationHighest Education": "SpecializationHighest_Education",
+  "InstituteHighest Education": "InstituteHighest_Education",
+  "Course2nd Highest Education": "Course2nd_Highest_Education",
+  "Specialization2nd Highest Education": "Specialization2nd_Highest_Education",
+  "Institute2nd Highest Education": "Institute2nd_Highest_Education"
+};
+console.log(results[0]); // check exact keys and structure
+
+const cities = [
+  "Mumbai", "Delhi", "Bengaluru","bangalore", "Kolkata", "Chennai", "Hyderabad", "Pune", "Ahmedabad",
+  "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam",
+  "Pimpri-Chinchwad", "Patna", "Vadodara", "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad",
+  "Meerut", "Rajkot", "Kalyan-Dombivli", "Vasai-Virar", "Varanasi", "Srinagar", "Aurangabad",
+  "Dhanbad", "Amritsar", "Navi Mumbai", "Allahabad", "Ranchi", "Howrah", "Coimbatore",
+  "Jabalpur", "Gwalior", "Vijayawada", "Jodhpur", "Madurai", "Raipur", "Kota", "Guwahati",
+  "Chandigarh", "Solapur", "Hubli-Dharwad", "Tiruchirappalli", "Bareilly", "Mysore",
+  "Tiruppur", "Gurgaon", "Aligarh", "Jalandhar", "Bhubaneswar", "Salem", "Mira-Bhayandar",
+  "Warangal", "Thiruvananthapuram", "Bhiwandi", "Saharanpur", "Guntur", "Amravati", "Bikaner",
+  "Noida", "Jamshedpur", "Bhilai", "Cuttack", "Firozabad", "Kochi", "Nellore", "Bhavnagar",
+  "Dehradun", "Durgapur", "Asansol", "Rourkela", "Ajmer", "Tirunelveli", "Malegaon",
+  "Jamnagar", "Ujjain", "Siliguri", "Jhansi", "Ulhasnagar", "Jammu", "Sangli-Miraj",
+  "Mangalore", "Erode", "Belgaum", "Kurnool", "Tirupati", "Kolhapur", "Ahmednagar",
+  "Gulbarga", "Mhow", "Muzaffarpur", "Akola", "Sambalpur", "Bilaspur", "Ambattur",
+  // Added more cities
+  "Anantapur", "Arrah", "Bankura", "Baran", "Barasat", "Begusarai", "Berhampore", "Bettiah",
+  "Chhindwara", "Chittoor", "Cooch Behar", "Darbhanga", "Egra", "Eluru", "Farrukhabad",
+  "Gaya", "Haldwani", "Hazaribagh", "Imphal", "Itanagar", "Jalgaon", "Jalpaiguri", "Kharagpur",
+  "Kishanganj", "Kollam", "Korba", "Kozhikode", "Latur", "Malappuram", "Mau", "Mirzapur",
+  "Moradabad", "Nagapattinam", "Nagercoil", "Naihati", "North Lakhimpur", "Ongole", "Palakkad",
+  "Pali", "Parbhani", "Patan", "Patiala", "Phagwara", "Pilibhit", "Pondicherry", "Purulia",
+  "Raichur", "Rajahmundry", "Rampur", "Rewa", "Sagar", "Satna", "Shivamogga", "Sikar",
+  "Srinagar (J&K)", "Sultanpur", "Suryapet", "Tadepalligudem", "Tiruvannamalai", "Udaipur",
+  "Udupi", "Valsad", "Vellore", "Yamunanagar", "Zunheboto","chennai"
+];
 
 
   // hide SharePoint chrome
@@ -153,16 +208,35 @@ const handleClear = () => {
           <h2 className={styles.cardTitle}>🔎 Search Candidates</h2>
 
           <div className={styles.form}>
-            {formFields.map(({ key, label }) => (
-              <input
-                key={key}
-                name={key}
-                placeholder={label}
-                className={styles.input}
-                value={query[key] || ""}
-                onChange={handleChange}
-              />
-            ))}
+{/* City field with dropdown */}
+<div>
+  <input
+    list="cities-list"
+    name="City"
+    placeholder="City"
+    className={styles.input}
+    value={query.City || ""}
+    onChange={handleChange}
+  />
+  <datalist id="cities-list">
+    {cities.map((city, idx) => (
+      <option key={idx} value={city} />
+    ))}
+  </datalist>
+</div>
+
+{/* Other form fields */}
+{formFields.map(({ key, label }) => (
+  <input
+    key={key}
+    name={key}
+    placeholder={label}
+    className={styles.input}
+    value={query[key] || ""}
+    onChange={handleChange}
+  />
+))}
+
 
             <div className={styles.buttonGroup}>
               <button className={styles.searchBtn} onClick={handleSearch} disabled={loading}>
@@ -178,49 +252,62 @@ const handleClear = () => {
         {/* Results */}
         <div className={styles.card}>
           <h3 className={styles.cardTitle}>📊 Results</h3>
-          {results.length === 0 ? (
+    {loading ? (
+  <div className={styles.loader}>
+    🔄 Loading results...
+  </div>
+) : results.length === 0 ? (
   <p className={styles.noResults}>
     {Object.keys(query).length === 0
       ? "Please enter a search filter and click Search."
       : "No records found."}
   </p>
 ) : (
+  <div className={styles.tableWrapper}>
+    <table className={styles.resultsTable}>
+      <thead>
+        <tr>
+          {Object.keys(visibleColumnsMap).map(col => (
+            <th key={col}>{col}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {results.map((row, idx) => (
+          <tr key={idx}>
+            {Object.keys(visibleColumnsMap).map(col => {
+              const apiKey = visibleColumnsMap[col];
+              return (
+                <td key={col}>
+                  {row[apiKey] !== undefined
+                    ? Array.isArray(row[apiKey])
+                      ? row[apiKey].join(", ")
+                      : row[apiKey]
+                    : ""}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
-            <div className={styles.tableWrapper}>
-              <table className={styles.resultsTable}>
-                <thead>
-                  <tr>
-                    {Object.keys(results[0]).map((col) => (
-                      <th key={col}>{col.replace(/_/g, " ")}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((row, idx) => (
-                    <tr key={idx}>
-                      {Object.keys(row).map((col) => (
-                        <td key={col}>{Array.isArray(row[col]) ? row[col].join(", ") : String(row[col] ?? "")}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <div className={styles.pagination}>
+      <button disabled={currentPage === 1} onClick={() => fetchPage(currentPage - 1, query)}>
+        ◀ Prev
+      </button>
 
-              <div className={styles.pagination}>
-                <button disabled={currentPage === 1} onClick={() => fetchPage(currentPage - 1, query)}>
-                  ◀ Prev
-                </button>
+      <span>
+        Page {currentPage} of {totalPages}
+      </span>
 
-                <span>
-                  Page {currentPage} of {totalPages}
-                </span>
+      <button disabled={currentPage === totalPages} onClick={() => fetchPage(currentPage + 1, query)}>
+        Next ▶
+      </button>
+    </div>
+  </div>
+)}
 
-                <button disabled={currentPage === totalPages} onClick={() => fetchPage(currentPage + 1, query)}>
-                  Next ▶
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         <footer className={styles.footer}>© 2025 Candidate Search. All rights reserved.</footer>

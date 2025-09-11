@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #f5f6fa; /* Soft gray for background */
   font-family: "Segoe UI", sans-serif;
 }
 
@@ -13,7 +13,7 @@
    Header
    ===================== */
 .header {
-  background: linear-gradient(to right, #0e5a69, #1E93AB); /* ✅ Teal gradient */
+  background: linear-gradient(to right, #1f3c88, #2ab7ca); /* Deep blue to cyan gradient */
   color: white;
   display: flex;
   align-items: center;
@@ -41,7 +41,7 @@
 .titleBlock p {
   margin: 4px 0 0;
   font-size: 1rem;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 /* =====================
@@ -52,7 +52,7 @@
   margin: 1.5rem auto;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); /* slightly stronger shadow */
   width: 95%;
   max-width: 1200px;
 }
@@ -61,7 +61,7 @@
   font-size: 1.2rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: #1E93AB; /* ✅ primary color */
+  color: #1f3c88; /* primary deep blue */
 }
 
 /* =====================
@@ -69,7 +69,7 @@
    ===================== */
 .form {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* evenly spaced */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 0.5rem 2rem;
   align-items: center;
 }
@@ -82,31 +82,29 @@
   font-size: 14px;
   line-height: 1.4;
   transition: border-color 0.2s, box-shadow 0.2s;
-
-  &:focus {
-    outline: none;
-    border-color: #0078d4;
-    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
-  }
-
-  /* Remove inputGroup — not needed unless you add labels */
-.inputGroup {
-  margin: 0; /* reset */
-  padding: 0;
 }
 
+.input:focus {
+  outline: none;
+  border-color: #2ab7ca; /* cyan accent */
+  box-shadow: 0 0 0 2px rgba(42, 183, 202, 0.2);
+}
+
+.inputGroup {
+  margin: 0;
+  padding: 0;
 }
 
 /* Button Group */
 .buttonGroup {
   display: flex;
   gap: 10px;
-  justify-content: flex-end; /* ✅ Aligns buttons to the right */
-  grid-column: 1 / -1; /* ✅ span full row */
+  justify-content: flex-end;
+  grid-column: 1 / -1;
 }
 
 .searchBtn {
-  background: #1E93AB;
+  background: #2ab7ca; /* cyan */
   color: white;
   font-weight: bold;
   border: none;
@@ -117,12 +115,12 @@
 }
 
 .searchBtn:hover {
-  background: #167d91;
+  background: #1f8ca0; /* slightly darker cyan */
 }
 
 .clearBtn {
-  background: #ccc;
-  color: #000;
+  background: #ff6b6b; /* coral */
+  color: white;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 6px;
@@ -131,14 +129,14 @@
 }
 
 .clearBtn:hover {
-  background: #aaa;
+  background: #e85c5c; /* darker coral */
 }
 
 .loading {
   text-align: center;
   padding: 1rem;
   font-size: 1.1rem;
-  color: #1e93ab;
+  color: #2ab7ca;
   font-weight: 500;
 }
 
@@ -165,12 +163,12 @@
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   font-size: 14px;
 }
 
 .resultsTable thead {
-  background: #0e5a69;
+  background: #0d708f; /* deep blue */
   color: #fff;
 }
 
@@ -191,11 +189,11 @@
 }
 
 .resultsTable tbody tr:nth-child(even) {
-  background: #f0f9fb;
+  background: #e5e9ec; /* lighter blue-gray */
 }
 
 .resultsTable tbody tr:hover {
-  background: #d9f1f5;
+  background: #eef6fb; /* subtle cyan hover */
   transition: background 0.2s ease-in-out;
 }
 
@@ -203,6 +201,14 @@
   color: #374151;
   font-size: 13px;
 }
+
+.loader {
+  text-align: center;
+  font-size: 18px;
+  padding: 30px 0;
+  color: #0078d4; // nice blue color
+}
+
 
 /* =====================
    Pagination
@@ -216,7 +222,7 @@
 }
 
 .pagination button {
-  background: #1E93AB;
+  background: #2ab7ca;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -231,7 +237,7 @@
 }
 
 .pagination button:hover:not(:disabled) {
-  background: #167d91;
+  background: #1f8ca0;
 }
 
 /* =====================
@@ -240,7 +246,7 @@
 .footer {
   text-align: center;
   padding: 1rem;
-  background: #0e5a69;
+  background: #1f3c88; /* deep blue */
   color: white;
   margin-top: auto;
 }
