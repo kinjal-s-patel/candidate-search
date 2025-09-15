@@ -109,25 +109,21 @@ const visibleColumnsMap: Record<string, string> = {
   "Name": "Name",
   "Mobile": "Mobile",
   "Email": "Email",
-  "Address": "Address",
+  // "Address": "Address",
   "City": "City",
-  "DOB": "DOB",
   "Functional Area": "Functional_Area",
-  "Area of Specialization": "Area_of_Specialization",
   "Industry": "Industry",
-  "Resume Title": "Resume_Title",
   "Key Skills": "Key_Skills",
+  "Area of Specialization": "Area_of_Specialization",
   "Company": "Company",
   "Salary": "Salary",
   "Work Experience": "Work_Experience",
-  "Level": "Level",
+  // "Level": "Level",
   "Preferred Location": "Preferred_Location",
      "CourseHighest Education": "CourseHighest_Education",
   "SpecializationHighest Education": "SpecializationHighest_Education",
-  "InstituteHighest Education": "InstituteHighest_Education",
   "Course2nd Highest Education": "Course2nd_Highest_Education",
-  "Specialization2nd Highest Education": "Specialization2nd_Highest_Education",
-  "Institute2nd Highest Education": "Institute2nd_Highest_Education"
+ 
 };
 console.log(results[0]); // check exact keys and structure
 
