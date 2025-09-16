@@ -8,14 +8,23 @@ export interface ICsvSearchFormProps {
 }
 
 // normalization helper
-const normalizeKey = (key: string): string =>
-  key
-    ? key
-        .toString()
+const normalizeKey = (key: string) => {
+  if (!key) return key;
+
+  switch (key) {
+    case "Course(Highest_Education)":
+      return "CourseHighest_Education";
+    case "Specialization(Highest_Education)":
+      return "SpecializationHighest_Education";
+    case "Course(2nd_Highest_Education)":
+      return "Course2nd_Highest_Education";
+    default:
+      return key
         .trim()
-        .replace(/\s+|\(|\)|-+/g, "_") // replace spaces, (), -
-        .replace(/^_+|_+$/g, "") // trim underscores
-    : key;
+        .replace(/\s+|\(|\)|-+/g, "_")
+        .replace(/^_+|_+$/g, "");
+  }
+};
 
 const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [results, setResults] = React.useState<any[]>([]);
@@ -37,7 +46,7 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
         pageSize: rowsPerPage.toString(),
         ...filters,
       });
-      const res = await fetch(`http://localhost:3000/api/users?${params.toString()}`);
+      const res = await fetch(`https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params.toString()}`);
       if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
 
       const result = await res.json();
@@ -128,7 +137,7 @@ const visibleColumnsMap: Record<string, string> = {
 console.log(results[0]); // check exact keys and structure
 
 const cities = [
-  "Mumbai", "Delhi", "Bengaluru","bangalore", "Kolkata", "Chennai", "Hyderabad", "Pune", "Ahmedabad",
+  "Mumbai", "Delhi", "Bengaluru","bangalore", "Kolkata", "Chennai", "Hyderabad", "Pune", "Ahmedabad","Junagadh",
   "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam",
   "Pimpri-Chinchwad", "Patna", "Vadodara", "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad",
   "Meerut", "Rajkot", "Kalyan-Dombivli", "Vasai-Virar", "Varanasi", "Srinagar", "Aurangabad",
