@@ -48,6 +48,7 @@ const fetchPage = async (page: number, filters: Record<string, string> = {}) => 
     });
 
     const res = await fetch(
+      // `http://localhost:3000/api/users?${params}`
       `https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params}`
     );
     if (!res.ok) throw new Error(`API error ${res.status}`);
