@@ -38,31 +38,34 @@ const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
   // --- ✅ Fetch from API with pagination + filters
-  const fetchPage = async (page: number, filters: Record<string, string> = {}) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: rowsPerPage.toString(),
-        ...filters,
-      });
-      const res = await fetch(`https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params.toString()}`);
-      if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+const fetchPage = async (page: number, filters: Record<string, string> = {}) => {
+  setLoading(true);
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: rowsPerPage.toString(), // e.g., 20 rows
+      ...filters,
+    });
 
-      const result = await res.json();
-      setResults(result.data || []);
-      setTotalRows(result.total || 0);
-      setCurrentPage(result.page || page);
-    } catch (err) {
-      console.error("Error fetching API data:", err);
-      setResults([]);
-      setTotalRows(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await fetch(
+      `https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params}`
+    );
+    if (!res.ok) throw new Error(`API error ${res.status}`);
 
+    const result = await res.json();
 
+    // ✅ Always replace results (no append)
+    setResults(result.data || []);
+    setTotalRows(result.total || 0);
+    setCurrentPage(result.page || page);
+  } catch (err) {
+    console.error("Error fetching API data:", err);
+    setResults([]);
+    setTotalRows(0);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // form fields
   const rawFormFields = [
