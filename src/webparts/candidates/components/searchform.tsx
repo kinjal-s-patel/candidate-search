@@ -2,7 +2,13 @@ import * as React from "react";
 import styles from "./searchform.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import logo from "../assets/LOGO.png";
+import { spfi, SPFI, SPFx } from "@pnp/sp";
+import "@pnp/sp/security";
+import "@pnp/sp/webs";
+import "@pnp/sp/site-groups";
+import "@pnp/sp/site-users/web";
 
+import "@pnp/sp/webs";
 export interface ICsvSearchFormProps {
   context: WebPartContext;
 }
@@ -26,47 +32,102 @@ const normalizeKey = (key: string) => {
   }
 };
 
+
 const CsvSearchForm: React.FC<ICsvSearchFormProps> = ({ context }) => {
   const [results, setResults] = React.useState<any[]>([]);
   const [query, setQuery] = React.useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalRows, setTotalRows] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
-// const [cities] = React.useState<string[]>([]);
+const [canExport, setCanExport] = React.useState(false);
+const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  const rowsPerPage = 20;
+
+  const rowsPerPage = 50;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
-  // --- ✅ Fetch from API with pagination + filters
+React.useEffect(() => {
+  const sp: SPFI = spfi().using(SPFx(context));
+
+  const checkPermission = async () => {
+    try {
+      const adminEmails = [
+        "japan@jmsadvisory.in",
+        "japan.shah@jmsadvisory.in",
+        "kinjal@jmsadvisory.in", // fixed typo
+        "supal.shah@jmsadvisory.in"
+      ];
+
+      const currentUser = await sp.web.currentUser();
+
+      // log what we actually get
+      console.log("Current User Info:", currentUser);
+
+      // use both Email and LoginName to match
+      const userEmail = currentUser.Email?.toLowerCase() || "";
+      const userLogin = currentUser.LoginName?.toLowerCase() || "";
+
+      const isAdmin = adminEmails.some(email =>
+        userEmail.includes(email.toLowerCase()) ||
+        userLogin.includes(email.toLowerCase())
+      );
+
+      setCanExport(isAdmin);
+    } catch (err) {
+      console.error("Error checking export permission:", err);
+      setCanExport(false);
+    }
+  };
+
+  checkPermission();
+}, [context]);
+
+
+
+
 const fetchPage = async (page: number, filters: Record<string, string> = {}) => {
   setLoading(true);
+
+  // Abort previous fetch if running
+  if (abortControllerRef.current) {
+    abortControllerRef.current.abort();
+  }
+
+  // Create new controller
+  abortControllerRef.current = new AbortController();
+
   try {
     const params = new URLSearchParams({
-      page: page.toString(),
-      pageSize: rowsPerPage.toString(), // e.g., 20 rows
+      page: String(page),
+      pageSize: String(rowsPerPage),
       ...filters,
     });
 
     const res = await fetch(
-      // `http://localhost:3000/api/users?${params}`
-      `https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params}`
+      `https://candidatesearch-api-gxeybdf9dqbefxad.centralindia-01.azurewebsites.net/api/users?${params}`,
+      { signal: abortControllerRef.current.signal }
     );
-    if (!res.ok) throw new Error(`API error ${res.status}`);
+
+    if (!res.ok) throw new Error("API Error");
 
     const result = await res.json();
 
-    // ✅ Always replace results (no append)
     setResults(result.data || []);
     setTotalRows(result.total || 0);
-    setCurrentPage(result.page || page);
-  } catch (err) {
-    console.error("Error fetching API data:", err);
-    setResults([]);
-    setTotalRows(0);
+    setCurrentPage(page);
+  } catch (err: any) {
+    if (err.name === "AbortError") {
+      console.log("Search canceled by user.");
+      return;
+    }
+    console.error(err);
   } finally {
     setLoading(false);
+    abortControllerRef.current = null; // reset controller
   }
 };
+
+
 
   // form fields
   const rawFormFields = [
@@ -110,6 +171,58 @@ const handleSearch = () => {
   }
   fetchPage(1, query);
 };
+
+// Export only FIRST 1000 rows that match the search filter
+// ✅ Helper: Convert JSON to CSV and trigger download
+// Export ONLY the current page data from "results"
+const downloadCSV = () => {
+  if (!canExport) {
+    alert("You don't have permission to export.");
+    return;
+  }
+
+  if (results.length === 0) {
+    alert("No data available to export.");
+    return;
+  }
+
+  try {
+    // Build CSV
+    const headers = Object.keys(visibleColumnsMap);     // visible column names
+    const keys = Object.values(visibleColumnsMap);      // API keys
+
+    const csvRows = [
+      headers.join(","), // Header row
+      ...results.map(row =>
+        keys
+          .map(key => {
+            let value = row[key];
+            if (Array.isArray(value)) value = value.join(", ");
+            if (!value) value = "";
+            return `"${String(value).replace(/"/g, '""')}"`;
+          })
+          .join(",")
+      )
+    ];
+
+    const csvContent = csvRows.join("\n");
+
+    // Download file
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `candidate_page_${currentPage}.csv`;
+    link.click();
+
+  } catch (err) {
+    console.error("Export error:", err);
+    alert("Something went wrong while exporting.");
+  }
+};
+
+
 
 // ✅ clear filters (no auto-fetch)
 const handleClear = () => {
@@ -247,20 +360,55 @@ const cities = [
 ))}
 
 
-            <div className={styles.buttonGroup}>
-              <button className={styles.searchBtn} onClick={handleSearch} disabled={loading}>
-                {loading ? "Loading..." : "Search"}
-              </button>
-              <button className={styles.clearBtn} onClick={handleClear} disabled={loading}>
-                Clear Filters
-              </button>
-            </div>
+<div className={styles.buttonGroup}>
+  {/* Search Button */}
+  {!loading && (
+    <button className={styles.searchBtn} onClick={handleSearch}>
+      Search
+    </button>
+  )}
+
+  {/* Stop Searching Button - Only visible while loading */}
+  {loading && (
+    <button
+      className={styles.clearBtn}
+      style={{ background: "red", color: "white" }}
+      onClick={() => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort(); // cancel fetch
+        }
+        setLoading(false); // stop loader
+      }}
+    >
+      🛑 Stop Searching
+    </button>
+  )}
+
+  {/* Clear Button (disabled while searching) */}
+  <button className={styles.clearBtn} onClick={handleClear} disabled={loading}>
+    Clear Filters
+  </button>
+</div>
+
           </div>
         </div>
 
         {/* Results */}
         <div className={styles.card}>
           <h3 className={styles.cardTitle}>📊 Results</h3>
+              <div className={styles.downloadWrapper}>
+<button
+  className={styles.downloadBtn}
+  onClick={downloadCSV}
+  disabled={!canExport || results.length === 0}
+  title={!canExport ? "You don't have permission to export data" : ""}
+>
+  ⬇️ Export Data
+</button>
+
+
+</div>
+
     {loading ? (
   <div className={styles.loader}>
     🔄 Loading results...
