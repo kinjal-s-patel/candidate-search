@@ -1,29 +1,94 @@
-/* =====================
-   Layout Wrapper
-   ===================== */
+/* ==========================================================================
+   Candidate Search – design tokens
+   Palette: ink navy (text / header), teal (primary action), slate (neutrals)
+   ========================================================================== */
+$ink: #13243b;
+$ink-soft: #4a5b70;
+$ink-muted: #7b8a9c;
+$line: #dde3ea;
+$line-soft: #eaeef3;
+$canvas: #f2f5f8;
+$surface: #ffffff;
+$surface-alt: #f8fafc;
+$primary: #0e7490;
+$primary-dark: #0b5c73;
+$primary-tint: #e6f3f7;
+$danger: #b4372b;
+$danger-dark: #952c22;
+$danger-tint: #fdeceb;
+
+$radius-sm: 6px;
+$radius-md: 8px;
+$radius-lg: 12px;
+
+$font: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+  "Helvetica Neue", Arial, sans-serif;
+
+/* ==========================================================================
+   Page shell
+   ========================================================================== */
 .pageWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f5f6fa; /* Soft gray for background */
-  font-family: "Segoe UI", sans-serif;
+  background: $canvas;
+  color: $ink;
+  font-family: $font;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 }
 
-/* =====================
+.container {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+/* ==========================================================================
    Header
-   ===================== */
+   ========================================================================== */
 .header {
-  background: linear-gradient(to right, #1f3c88, #2ab7ca); /* Deep blue to cyan gradient */
-  color: white;
+  background: $surface;
+  border-bottom: 1px solid $line;
+  border-top: 3px solid $primary;
+}
+
+.headerInner {
   display: flex;
   align-items: center;
-  padding: 1rem 2rem;
-  gap: 1rem;
+  gap: 20px;
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
 
-.logo img {
-  width: 45px;
-  height: auto;
+.logo {
+  display: flex;
+  align-items: center;
+  padding-right: 20px;
+  border-right: 1px solid $line;
+
+  img {
+    display: block;
+    width: 120px;
+    height: auto;
+  }
 }
 
 .titleBlock {
@@ -31,249 +96,563 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+
+  h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: $ink;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: $ink-soft;
+  }
 }
 
-.titleBlock h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
-
-.titleBlock p {
-  margin: 4px 0 0;
-  font-size: 1rem;
-  opacity: 0.85;
-}
-
-/* =====================
+/* ==========================================================================
    Card
-   ===================== */
+   ========================================================================== */
 .card {
-  background: white;
-  margin: 1.5rem auto;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); /* slightly stronger shadow */
-  width: 95%;
-  max-width: 1200px;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius-lg;
+  box-shadow: 0 1px 2px rgba(19, 36, 59, 0.04);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  border-bottom: 1px solid $line-soft;
+}
+
+.cardHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .cardTitle {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #1f3c88; /* primary deep blue */
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: $ink;
 }
 
-/* =====================
-   Form
-   ===================== */
+.cardSubtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $ink-muted;
+}
+
+.cardBody {
+  padding: 24px;
+}
+
+/* ==========================================================================
+   Filter form
+   ========================================================================== */
 .form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.group {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 0.5rem 2rem;
-  align-items: center;
+  grid-template-columns: 180px 1fr;
+  gap: 8px 24px;
+  align-items: start;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed $line;
+
+  &:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.groupInfo {
+  h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $ink;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: $ink-muted;
+  }
+}
+
+.groupFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $ink-soft;
 }
 
 .input {
   width: 100%;
-  padding: 10px 12px;
-   box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  height: 40px;
+  padding: 0 12px;
+  background: $surface;
+  border: 1px solid #c5ced8;
+  border-radius: $radius-md;
+  font-family: inherit;
   font-size: 14px;
-  line-height: 1.4;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  color: $ink;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &::placeholder {
+    color: #9aa7b6;
+  }
+
+  &:hover {
+    border-color: #9fb0c1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.18);
+  }
 }
 
-.input:focus {
-  outline: none;
-  border-color: #2ab7ca; /* cyan accent */
-  box-shadow: 0 0 0 2px rgba(42, 183, 202, 0.2);
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.formFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 -24px -24px;
+  padding: 16px 24px;
+  background: $surface-alt;
+  border-top: 1px solid $line-soft;
 }
 
-.inputGroup {
+.formHint {
   margin: 0;
-  padding: 0;
-    display: flex;
-  flex-direction: column;
+  font-size: 0.85rem;
+  color: $ink-muted;
 }
 
-/* Button Group */
 .buttonGroup {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  grid-column: 1 / -1;
+  margin-left: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.3);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 }
 
 .searchBtn {
-  background: #2ab7ca; /* cyan */
-  color: white;
-  font-weight: bold;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+  @extend .btn;
+  background: $primary;
+  color: #fff;
 
-.searchBtn:hover {
-  background: #1f8ca0; /* slightly darker cyan */
+  &:hover:not(:disabled) {
+    background: $primary-dark;
+  }
 }
 
 .clearBtn {
-  background: #ff6b6b; /* coral */
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
+  @extend .btn;
+  background: $surface;
+  color: $ink-soft;
+  border-color: #c5ced8;
+
+  &:hover:not(:disabled) {
+    background: $surface-alt;
+    border-color: #9fb0c1;
+    color: $ink;
+  }
 }
 
-.clearBtn:hover {
-  background: #e85c5c; /* darker coral */
+.stopBtn {
+  @extend .btn;
+  background: $danger-tint;
+  color: $danger;
+  border-color: #f2c4c0;
+
+  &:hover:not(:disabled) {
+    background: $danger;
+    border-color: $danger;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(180, 55, 43, 0.3);
+  }
 }
 
-.loading {
-  text-align: center;
-  padding: 1rem;
-  font-size: 1.1rem;
-  color: #2ab7ca;
+.downloadWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.downloadBtn {
+  @extend .btn;
+  height: 36px;
+  padding: 0 16px;
+  background: $surface;
+  color: $primary;
+  border-color: $primary;
+
+  &:hover:not(:disabled) {
+    background: $primary-tint;
+  }
+
+  &:disabled {
+    color: $ink-muted;
+    border-color: $line;
+    background: $surface-alt;
+  }
+}
+
+/* ==========================================================================
+   Results
+   ========================================================================== */
+.resultsMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: $primary-tint;
+  color: $primary-dark;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.resultsTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.loading,
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 64px 16px;
+  font-size: 0.95rem;
   font-weight: 500;
+  color: $ink-soft;
 }
 
-/* =====================
-   Results Table
-   ===================== */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $line;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 56px 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: $canvas;
+  font-size: 22px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $ink;
+}
+
 .noResults {
-  color: #777;
-  font-style: italic;
+  margin: 0;
+  max-width: 420px;
+  color: $ink-muted;
+  font-style: normal;
 }
 
 .tableWrapper {
   width: 100%;
-  overflow-x: auto;
-  margin-top: 16px;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
+}
+
+.tableScroll {
+  width: 100%;
+  max-height: 68vh;
+  overflow: auto;
+  border-top: 1px solid $line-soft;
 }
 
 .resultsTable {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  font-size: 14px;
-}
-
-.resultsTable thead {
-  background: #0d708f; /* deep blue */
-  color: #fff;
-}
-
-.resultsTable th,
-.resultsTable td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #e5e7eb;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 200px;
-}
-
-.resultsTable th {
-  font-weight: 600;
+  min-width: 1100px;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 13px;
-  text-transform: capitalize;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 12px 16px;
+    background: $ink;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: left;
+    text-transform: none;
+    white-space: nowrap;
+    border-bottom: 1px solid $ink;
+  }
+
+  tbody tr {
+    background: $surface;
+    transition: background 0.12s;
+  }
+
+  tbody tr:nth-child(even) {
+    background: $surface-alt;
+  }
+
+  tbody tr:hover {
+    background: $primary-tint;
+  }
+
+  td {
+    max-width: 220px;
+    padding: 11px 16px;
+    background: inherit;
+    border-bottom: 1px solid $line-soft;
+    color: #2b3b50;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  /* Keep the candidate name visible while scrolling sideways */
+  thead th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+  }
+
+  thead th:first-child {
+    z-index: 3;
+  }
+
+  td:first-child {
+    z-index: 1;
+    font-weight: 600;
+    color: $ink;
+    box-shadow: 1px 0 0 $line-soft;
+  }
 }
 
-.resultsTable tbody tr:nth-child(even) {
-  background: #e5e9ec; /* lighter blue-gray */
-}
-
-.resultsTable tbody tr:hover {
-  background: #eef6fb; /* subtle cyan hover */
-  transition: background 0.2s ease-in-out;
-}
-
-.resultsTable td {
-  color: #374151;
-  font-size: 13px;
-}
-
-.loader {
-  text-align: center;
-  font-size: 18px;
-  padding: 30px 0;
-  color: #0078d4; // nice blue color
-}
-
-
-/* =====================
+/* ==========================================================================
    Pagination
-   ===================== */
+   ========================================================================== */
 .pagination {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
-  gap: 1rem;
-}
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 24px;
+  background: $surface-alt;
+  border-top: 1px solid $line-soft;
 
-.pagination button {
-  background: #2ab7ca;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.pagination button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #1f8ca0;
-}
-.downloadWrapper {
-  text-align: right;
-  margin-bottom: 10px;
-}
-
-.downloadBtn {
-  background-color: #0078d4;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.3s;
-
-  &:hover {
-    background-color: #005a9e;
+  span {
+    font-size: 0.88rem;
+    color: $ink-soft;
+    font-variant-numeric: tabular-nums;
   }
 
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    background: $surface;
+    color: $ink;
+    border: 1px solid #c5ced8;
+    border-radius: $radius-sm;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+    &:hover:not(:disabled) {
+      background: $primary;
+      border-color: $primary;
+      color: #fff;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.3);
+    }
+
+    &:disabled {
+      color: #a3afbd;
+      background: $surface-alt;
+      border-color: $line;
+      cursor: not-allowed;
+    }
   }
 }
 
-/* =====================
+/* ==========================================================================
    Footer
-   ===================== */
+   ========================================================================== */
 .footer {
-  text-align: center;
-  padding: 1rem;
-  background: #1f3c88; /* deep blue */
-  color: white;
+  padding: 16px;
   margin-top: auto;
+  background: $surface;
+  border-top: 1px solid $line;
+  color: $ink-muted;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 900px) {
+  .group {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  .headerInner {
+    gap: 12px;
+  }
+
+  .logo {
+    padding-right: 12px;
+
+    img {
+      width: 84px;
+    }
+  }
+
+  .titleBlock h1 {
+    font-size: 1.1rem;
+  }
+
+  .cardHeader,
+  .cardBody,
+  .pagination {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .formFooter {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .formHint {
+    display: none;
+  }
+
+  .buttonGroup {
+    width: 100%;
+
+    > * {
+      flex: 1;
+    }
+  }
+
+  .pagination {
+    justify-content: center;
+  }
 }
